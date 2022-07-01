@@ -1,0 +1,23 @@
+{
+  "name": "testjssip",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "jssip testing",
+  "main": "./src/app.js",
+  "scripts": {
+    "command1": "browserify ./src/app.js > ./dist/bundle.js -t babelify",
+    "build": "npm run command1"
+  },
+  "keywords": [],
+  "author": "mrc",
+  "license": "ISC",
+  "dependencies": {
+    "jssip": "^3.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "babelify": "^10.0.0",
+    "browserify": "^17.0.0"
+  }
+}

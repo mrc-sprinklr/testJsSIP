@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible"
+          content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>testjssip</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 10px 30px;
+            background-color: cornsilk;
+            color: salmon;
+        }
+
+        #phone-number,
+        #call-button {
+            margin: 10px 30px 0 0;
+            padding: 5px 10px;
+            font-size: 18px;
+            background-color: bisque;
+            color: salmon;
+            border: 2px solid salmon;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #phone-number:focus {
+            outline: none;
+        }
+
+        #call-button:hover {
+            box-shadow: 2px 2px 2px 1px salmon;
+        }
+
+        #call-button:disabled {
+            display: none;
+        }
+
+        video {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>TEST-JSSIP</h1>
+
+    <input type="number"
+           id="phone-number"
+           placeholder="phone number"
+           value="4153260912">
+    <!-- value="6285004633"> -->
+    <button id="call-button"
+            disabled>Call</button>
+
+    <video id="localMedia"
+           autoplay
+           playsinline></video>
+    <video id="remoteMedia"
+           autoplay
+           playsinline></video>
+
+    <script src="./dist/bundle.js"
+            type="module"></script>
+</body>
+
+</html>
