@@ -1,13 +1,18 @@
 const JsSIP = require("JsSIP");
 JsSIP.debug.enable("JsSIP:*");
 
+let [phone, call] = [null, null];
+
+// ________________________________________________________________
+
 // Debugging purpose :)
 const redAlert = () => {
   document.querySelector("body").innerHTML = "";
   document.querySelector("body").style.backgroundColor = "darkred";
 };
 
-let [phone, call] = [null, null];
+const bc = new BroadcastChannel("call-info");
+// ________________________________________________________________
 
 let [sip, password, server_address, port] = [
   "1000",
@@ -94,22 +99,20 @@ function addStreams() {
 phone = new JsSIP.UA(configuration);
 phone.start();
 
-const call_button = document.getElementById("call-button");
-call_button.onclick = () => {
-  console.log("CALL CLICKED");
-
-  phone.call(
-    "125311" + document.getElementById("phone-number").value,
-    callOptions
-  );
-  addStreams();
-};
+bc.on("message", function (event) {
+  if (event.data.header === "call") {
+    phone.call(event.data.value, callOptions);
+    addStreams();
+  } else if (event.data.header === "hangup") {
+    terminate();
+  }
+});
 
 // ________________________________________________________________
 
 phone.on("connected", function (e) {
   console.log("connected");
-  call_button.disabled = false;
+  bc.postMessage("call_disabled", false);
 });
 
 phone.on("disconnected", function (e) {
@@ -138,52 +141,31 @@ function terminate() {
 
 // ________________________________________________________________
 
-phone.on("newRTCSession", function (event) {
-  console.log("newRTCSession", event);
-  console.log("Direction: ", event.session.direction);
+// phone.on("newRTCSession", function (event) {
+//   call = event.session;
+//   console.log("Direction: ", call.direction);
 
-  call = event.session;
-  call.on("sdp", function (e) {
-    console.log("call sdp: ", e.sdp);
-  });
-  call.on("accepted", function (e) {
-    console.log("call accepted: ", e);
-  });
-  call.on("progress", function (e) {
-    console.log("call is in progress: ", e);
-  });
-  call.on("confirmed", function (e) {
-    console.log("confirmed by", e.originator);
-
-    // const localStreams = call.connection.getLocalStreams();
-    // console.log(
-    //   "confirmed with a number of local streams",
-    //   localStreams.length
-    // );
-
-    // const remoteStreams = call.connection.getRemoteStreams();
-    // console.log(
-    //   "confirmed with a number of remote streams",
-    //   remoteStreams.length
-    // );
-
-    // let localStream = localStreams[0];
-    // let dtmfSender = call.connection.createDTMFSender(
-    //   localStream.getAudioTracks()[0]
-    // );
-    // call.sendDTMF = function (tone) {
-    //   dtmfSender.insertDTMF(tone);
-    // };
-  });
-  call.on("ended", function (e) {
-    console.log("Call ended: ", e);
-    terminate();
-  });
-  call.on("failed", function (e) {
-    console.log("Call failed: ", e);
-    terminate();
-  });
-  call.on("peerconnection", function (e) {
-    console.log("call peerconnection: ", e);
-  });
-});
+//   call.on("sdp", function (e) {
+//     console.log("call sdp: ", e.sdp);
+//   });
+//   call.on("accepted", function (e) {
+//     console.log("call accepted: ", e);
+//   });
+//   call.on("progress", function (e) {
+//     console.log("call is in progress: ", e);
+//   });
+//   call.on("confirmed", function (e) {
+//     console.log("confirmed by", e.originator);
+//   });
+//   call.on("ended", function (e) {
+//     console.log("Call ended: ", e);
+//     terminate();
+//   });
+//   call.on("failed", function (e) {
+//     console.log("Call failed: ", e);
+//     terminate();
+//   });
+//   call.on("peerconnection", function (e) {
+//     console.log("call peerconnection: ", e);
+//   });
+// });

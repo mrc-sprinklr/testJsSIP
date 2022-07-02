@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible"
+          content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Verdana, Geneva, Tahoma, sans-serif
+        }
+
+        #root-container {
+            margin: 0;
+            padding: 50px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #grid-container {
+            padding: 20px 30px;
+            display: grid;
+            align-items: stretch;
+            place-items: center;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 30px;
+            row-gap: 20px;
+            background-color: mintcream;
+            border: 5px solid darkturquoise;
+            border-radius: 10px;
+        }
+
+        .grid-item-large {
+            grid-column-start: 1;
+            grid-column-end: 3;
+        }
+
+        input,
+        button {
+            font-size: 18px;
+            padding: 5px 15px;
+            border: 1px solid darkturquoise;
+            border-radius: 10px;
+        }
+
+        button:hover {
+            cursor: pointer;
+            background-color: rgb(230, 230, 240);
+            box-shadow: 1px 1px 1px 1px darkturquoise;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root-container">
+        <div id="grid-container">
+            <div class="grid-item-large">
+                <input type="number"
+                       id="phone-number"
+                       placeholder="phone number">
+            </div>
+            <div class="grid-item">
+                <button id="call">Call</button>
+            </div>
+            <div class="grid-item">
+                <button id="hangup">Hangup</button>
+            </div>
+            <div class="grid-item">
+                <button id="mute">Mute</button>
+            </div>
+            <div class="grid-item">
+                <button id="unmute">Unmute</button>
+            </div>
+            <div class="grid-item">
+                <button id="hold">Hold</button>
+            </div>
+            <div class="grid-item">
+                <button id="unhold">Unhold</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

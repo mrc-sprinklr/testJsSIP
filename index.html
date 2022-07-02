@@ -65,6 +65,26 @@
            autoplay
            playsinline></video>
 
+    <script type="text/javascript">
+        const call_button = document.getElementById("call-button");
+
+        const bc = new BroadcastChannel("call-info");
+        bc.on("message", function () {
+            if (event.data.header === "call_disabled") {
+                call_button.disabled = event.data.value;
+            }
+        });
+
+        call_button.onclick = () => {
+            console.log("CALL CLICKED");
+            bc.postMessage({
+                header: "call",
+                value: "125311" + document.getElementById("phone-number").value,
+            });
+        };
+
+    </script>
+
     <script src="./dist/bundle.js"
             type="module"></script>
 </body>
