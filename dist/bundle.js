@@ -28393,8 +28393,8 @@ function addStreams() {
   call.connection.addEventListener("addstream", function (event) {
     incomingCallAudio.pause();
     remoteAudio.srcObject = event.stream;
-    localView.srcObject = session.connection.getLocalStreams()[0];
-    remoteView.srcObject = session.connection.getRemoteStreams()[0];
+    localView.srcObject = call.connection.getLocalStreams()[0];
+    remoteView.srcObject = call.connection.getRemoteStreams()[0];
   });
 } // ________________________________________________________________
 
