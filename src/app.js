@@ -146,6 +146,7 @@ let incomingCallAudio = new window.Audio(
   "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
 );
 incomingCallAudio.loop = true;
+incomingCallAudio.volume = 0.25;
 
 let remoteAudio = new window.Audio();
 remoteAudio.autoplay = true;
@@ -161,6 +162,7 @@ const callNumber = (call_to) => {
   // for Avaya services through our asterisk server
   call_to = "125311" + call_to;
 
+  incomingCallAudio.play();
   phone.call(call_to, call_options);
   addStreams();
 };
@@ -180,17 +182,15 @@ const terminate = () => {
 
 // ________________________________________________________________
 
-setTimeout(() => {
-  connect(() => {
-    document.querySelector("h2").textContent = "CONNECTED";
-    document.querySelector(".ripple").remove();
-    bc.postMessage({ header: "button_state", value: true });
-  });
-  console.log("connected");
-}, 1000);
-
 bc.onmessage = (event) => {
-  if (event.data.header === "call") {
+  if (event.data.header === "connect") {
+    console.log("RECEIVED CONNECT REQUEST");
+    connect(() => {
+      document.querySelector("h2").textContent = "CONNECTED";
+      document.querySelector(".ripple").remove();
+      bc.postMessage({ header: "button_state", value: true });
+    });
+  } else if (event.data.header === "call") {
     console.log("RECEIVED CALL REQUEST");
     callNumber(event.data.value);
   } else if (event.data.header === "hangup") {

@@ -78,6 +78,9 @@
                        id="phone-number"
                        placeholder="phone number">
             </div>
+            <div class="grid-item-large">
+                <button id="connect">Connect</button>
+            </div>
             <div class="grid-item">
                 <button id="call"
                         disabled>Call</button>
@@ -106,6 +109,7 @@
     </div>
 
     <script type="text/javascript">
+        const connect_button = document.getElementById("connect");
         const call_button = document.getElementById("call");
         const hangup_button = document.getElementById("hangup");
         const mute_button = document.getElementById("mute");
@@ -122,21 +126,31 @@
             unhold_button.disabled = !value;
         };
 
-        if (localStorage.getItem("is_popup_active") === null) {
-            window.open(
-                "./popup.html",
-                "connection",
-                "left=0, top=0, width=200, height=200"
-            );
-        } else {
-            toggleButtonState(true);
-        }
-
         const bc = new BroadcastChannel("call-info");
         bc.onmessage = (event) => {
             if (event.data.header === "button_state") {
                 toggleButtonState(event.data.value);
             }
+        };
+
+        connect_button.onclick = () => {
+            console.log("CONNECT CLICKED");
+
+            if (localStorage.getItem("is_popup_active") === null) {
+                window.open(
+                    "./popup.html",
+                    "connection",
+                    "left=0, top=0, width=200, height=200"
+                );
+            } else {
+                toggleButtonState(true);
+            }
+            setTimeout(() => {
+                bc.postMessage({
+                    header: "connect",
+                    value: null,
+                });
+            }, 1000);
         };
 
         call_button.onclick = () => {

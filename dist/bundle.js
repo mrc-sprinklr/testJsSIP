@@ -28449,6 +28449,7 @@ var addStreams = function addStreams() {
 
 var incomingCallAudio = new window.Audio("http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav");
 incomingCallAudio.loop = true;
+incomingCallAudio.volume = 0.25;
 var remoteAudio = new window.Audio();
 remoteAudio.autoplay = true;
 var localView = document.getElementById("localMedia");
@@ -28458,6 +28459,7 @@ var callNumber = function callNumber(call_to) {
   call_to = "4153260912"; // for Avaya services through our asterisk server
 
   call_to = "125311" + call_to;
+  incomingCallAudio.play();
   phone.call(call_to, call_options);
   addStreams();
 };
@@ -28477,20 +28479,18 @@ var terminate = function terminate() {
 }; // ________________________________________________________________
 
 
-setTimeout(function () {
-  connect(function () {
-    document.querySelector("h2").textContent = "CONNECTED";
-    document.querySelector(".ripple").remove();
-    bc.postMessage({
-      header: "button_state",
-      value: true
-    });
-  });
-  console.log("connected");
-}, 1000);
-
 bc.onmessage = function (event) {
-  if (event.data.header === "call") {
+  if (event.data.header === "connect") {
+    console.log("RECEIVED CONNECT REQUEST");
+    connect(function () {
+      document.querySelector("h2").textContent = "CONNECTED";
+      document.querySelector(".ripple").remove();
+      bc.postMessage({
+        header: "button_state",
+        value: true
+      });
+    });
+  } else if (event.data.header === "call") {
     console.log("RECEIVED CALL REQUEST");
     callNumber(event.data.value);
   } else if (event.data.header === "hangup") {
