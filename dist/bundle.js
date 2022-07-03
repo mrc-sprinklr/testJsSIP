@@ -28323,20 +28323,22 @@ module.exports = function (session, opts) {
 
 var JsSIP = require("JsSIP");
 
-JsSIP.debug.enable("JsSIP:*"); // Debugging purpose :)
-
-var redAlert = function redAlert() {
-  document.querySelector("body").innerHTML = "";
-  document.querySelector("body").style.backgroundColor = "darkred";
-};
-
+JsSIP.debug.enable("JsSIP:*");
 var phone = null,
     call = null;
+var bc = new BroadcastChannel("call-info");
+window.addEventListener("DOMContentLoaded", function () {
+  localStorage.setItem("is_popup_active", "true");
+});
+window.addEventListener("beforeunload", function () {
+  localStorage.clear();
+}); // ________________________________________________________________
+
 var sip = "1000",
     password = "1000_client",
     server_address = "18.212.171.223",
     port = "7443/ws";
-var callOptions = {
+var call_options = {
   eventHandlers: {
     progress: function progress(e) {
       console.log("call is in progress");
@@ -28381,6 +28383,69 @@ var configuration = {
   connection_recovery_max_interval: 30,
   connection_recovery_min_interval: 2
 }; // ________________________________________________________________
+// Debugging purpose :)
+
+var redAlert = function redAlert() {
+  document.querySelector("body").innerHTML = "";
+  document.querySelector("body").style.backgroundColor = "darkred";
+};
+
+var connect = function connect(callback) {
+  phone = new JsSIP.UA(configuration);
+  phone.start();
+  phone.on("connected", function (e) {
+    console.log("connected");
+    addEventListeners();
+    callback();
+  });
+  phone.on("disconnected", function (e) {
+    console.log("disconnected");
+  });
+  phone.on("newMessage", function (e) {
+    e.data.message.accept();
+    console.log(e);
+  });
+}; // ________________________________________________________________
+
+
+var addEventListeners = function addEventListeners() {
+  phone.on("newRTCSession", function (event) {
+    call = event.session;
+    console.log("Direction: ", call.direction); // call.on("sdp", (e) => {
+    //   console.log("call sdp: ", e.sdp);
+    // });
+    // call.on("accepted", (e) => {
+    //   console.log("call accepted: ", e);
+    // });
+    // call.on("progress", function (e) {
+    //   console.log("call is in progress: ", e);
+    // });
+    // call.on("confirmed", (e) => {
+    //   console.log("confirmed by", e.originator);
+    // });
+    // call.on("ended", (e) => {
+    //   console.log("Call ended: ", e);
+    //   terminate();
+    // });
+    // call.on("failed", (e) => {
+    //   console.log("Call failed: ", e);
+    //   terminate();
+    // });
+    // call.on("peerconnection", (e) => {
+    //   console.log("call peerconnection: ", e);
+    // });
+  });
+}; // ________________________________________________________________
+
+
+var addStreams = function addStreams() {
+  call.connection.addEventListener("addstream", function (event) {
+    incomingCallAudio.pause();
+    remoteAudio.srcObject = event.stream;
+    localView.srcObject = call.connection.getLocalStreams()[0];
+    remoteView.srcObject = call.connection.getRemoteStreams()[0];
+  });
+};
 
 var incomingCallAudio = new window.Audio("http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav");
 incomingCallAudio.loop = true;
@@ -28389,97 +28454,51 @@ remoteAudio.autoplay = true;
 var localView = document.getElementById("localMedia");
 var remoteView = document.getElementById("remoteMedia"); // ________________________________________________________________
 
-function addStreams() {
-  call.connection.addEventListener("addstream", function (event) {
-    incomingCallAudio.pause();
-    remoteAudio.srcObject = event.stream;
-    localView.srcObject = call.connection.getLocalStreams()[0];
-    remoteView.srcObject = call.connection.getRemoteStreams()[0];
-  });
-} // ________________________________________________________________
+var callNumber = function callNumber(call_to) {
+  call_to = "4153260912"; // for Avaya services through our asterisk server
 
-
-phone = new JsSIP.UA(configuration);
-phone.start();
-var call_button = document.getElementById("call-button");
-
-call_button.onclick = function () {
-  console.log("CALL CLICKED");
-  phone.call("125311" + document.getElementById("phone-number").value, callOptions);
+  call_to = "125311" + call_to;
+  phone.call(call_to, call_options);
   addStreams();
-}; // ________________________________________________________________
+};
 
-
-phone.on("connected", function (e) {
-  console.log("connected");
-  call_button.disabled = false;
-});
-phone.on("disconnected", function (e) {
-  console.log("disconnected");
-});
-phone.on("newMessage", function (e) {
-  e.data.message.accept();
-  console.log(e);
-}); // ________________________________________________________________
-
-function answer() {
+var answer = function answer() {
   if (call) {
-    call.answer(callOptions);
+    call.answer(call_options);
   }
-}
+};
 
-function terminate() {
+var terminate = function terminate() {
   if (call) {
     call.terminate();
   }
 
   call = null;
-} // ________________________________________________________________
+}; // ________________________________________________________________
 
 
-phone.on("newRTCSession", function (event) {
-  console.log("newRTCSession", event);
-  console.log("Direction: ", event.session.direction);
-  call = event.session;
-  call.on("sdp", function (e) {
-    console.log("call sdp: ", e.sdp);
+setTimeout(function () {
+  connect(function () {
+    document.querySelector("h2").textContent = "CONNECTED";
+    document.querySelector(".ripple").remove();
+    bc.postMessage({
+      header: "button_state",
+      value: true
+    });
   });
-  call.on("accepted", function (e) {
-    console.log("call accepted: ", e);
-  });
-  call.on("progress", function (e) {
-    console.log("call is in progress: ", e);
-  });
-  call.on("confirmed", function (e) {
-    console.log("confirmed by", e.originator); // const localStreams = call.connection.getLocalStreams();
-    // console.log(
-    //   "confirmed with a number of local streams",
-    //   localStreams.length
-    // );
-    // const remoteStreams = call.connection.getRemoteStreams();
-    // console.log(
-    //   "confirmed with a number of remote streams",
-    //   remoteStreams.length
-    // );
-    // let localStream = localStreams[0];
-    // let dtmfSender = call.connection.createDTMFSender(
-    //   localStream.getAudioTracks()[0]
-    // );
-    // call.sendDTMF = function (tone) {
-    //   dtmfSender.insertDTMF(tone);
-    // };
-  });
-  call.on("ended", function (e) {
-    console.log("Call ended: ", e);
+  console.log("connected");
+}, 1000);
+
+bc.onmessage = function (event) {
+  if (event.data.header === "call") {
+    console.log("RECEIVED CALL REQUEST");
+    callNumber(event.data.value);
+  } else if (event.data.header === "hangup") {
+    console.log("RECEIVED HANGUP REQUEST");
     terminate();
-  });
-  call.on("failed", function (e) {
-    console.log("Call failed: ", e);
-    terminate();
-  });
-  call.on("peerconnection", function (e) {
-    console.log("call peerconnection: ", e);
-  });
-});
+  } else {
+    console.log("UNKNOWN HEADER: " + event.data.header);
+  }
+};
 
 },{"JsSIP":8}]},{},[41]);
